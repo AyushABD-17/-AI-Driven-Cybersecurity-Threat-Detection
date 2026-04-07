@@ -1,0 +1,48 @@
+services:
+  # ----------------------------------------------------
+  # 1. Node.js Express Backend
+  # ----------------------------------------------------
+  - type: web
+    name: aiwatch-backend
+    env: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGO_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ML_SERVICE_URL
+        value: http://aiwatch-ml-service:8000
+
+  # ----------------------------------------------------
+  # 2. Python FastAPI ML Service
+  # ----------------------------------------------------
+  - type: web
+    name: aiwatch-ml-service
+    env: python
+    rootDir: ml-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: REDIS_URL
+        sync: false
+      - key: MODEL_PATH
+        value: models/
+      - key: LOG_RATE
+        value: 10
+      - key: ATTACK_RATE
+        value: 0.15
