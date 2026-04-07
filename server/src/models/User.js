@@ -24,15 +24,18 @@ const userSchema = new mongoose.Schema(
 );
 
 // ── Hash password before save ────────────────────────────────────────────────
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 12);
-  this.avatar_initials = this.name
-    .split(' ')
-    .map((n) => n[0].toUpperCase())
-    .slice(0, 2)
-    .join('');
-  next();
+  
+  if (this.name) {
+    this.avatar_initials = this.name
+      .split(' ')
+      .filter(n => n.length > 0)
+      .map(n => n[0].toUpperCase())
+      .slice(0, 2)
+      .join('');
+  }
 });
 
 // ── Instance method: compare password ────────────────────────────────────────
